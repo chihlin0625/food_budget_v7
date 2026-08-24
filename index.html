@@ -3,7 +3,33 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>預算管家 V6.7</title>
+    <title>預算管家 V6.8</title>
+    
+    <!-- PWA 手機主畫面設定 -->
+    <meta name="theme-color" content="#9333EA">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="預算管家">
+    <link rel="apple-touch-icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><rect width=%22100%22 height=%22100%22 rx=%2220%22 fill=%22%239333EA%22/><text y=%22.9em%22 font-size=%2290%22>💰</text></svg>">
+
+    <!-- Manifest 內嵌設定 -->
+    <link rel="manifest" href='data:application/manifest+json,{
+      "name": "預算管家",
+      "short_name": "預算管家",
+      "start_url": "./",
+      "display": "standalone",
+      "background_color": "#F7FAFC",
+      "theme_color": "#9333EA",
+      "icons": [
+        {
+          "src": "data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><rect width=%22100%22 height=%22100%22 rx=%2220%22 fill=%22%239333EA%22/><text y=%22.9em%22 font-size=%2290%22>💰</text></svg>",
+          "sizes": "512x512",
+          "type": "image/svg+xml"
+        }
+      ]
+    }'>
+
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700;900&display=swap" rel="stylesheet">
     <style>
@@ -27,10 +53,12 @@
 
     <div class="w-full max-w-md bg-white rounded-[2.5rem] shadow-2xl overflow-hidden relative border border-gray-100">
         
+        <!-- 設定按鈕 -->
         <button onclick="toggleSettings()" class="absolute top-6 right-6 text-purple-200 hover:text-white transition-colors z-20">
             <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
         </button>
 
+        <!-- 設定面板 -->
         <div id="settingsPanel" class="hidden bg-brand-50 border-b border-brand-100 p-8">
             <div class="space-y-4">
                 <div>
@@ -45,12 +73,13 @@
             </div>
         </div>
 
+        <!-- 上方週卡片 -->
         <div class="bg-brand-600 text-white p-10 text-center relative">
             <p class="text-purple-200 text-[11px] tracking-widest uppercase mb-2 font-bold opacity-90">Weekly Remaining</p>
             <h1 class="text-6xl font-black tracking-tighter">$ <span id="weekBalance">0</span></h1>
             <div class="flex justify-between mt-8 pt-6 border-t border-white/20">
                 <div class="text-left">
-                    <p class="opacity-80 text-[10px] font-bold uppercase">已花費 (個人)</p>
+                    <p class="opacity-80 text-[10px] font-bold uppercase">已花費</p>
                     <p class="font-black text-2xl mt-0.5">$ <span id="weekSum">0</span></p>
                 </div>
                 <div class="text-right">
@@ -60,6 +89,7 @@
             </div>
         </div>
 
+        <!-- 月進度區 -->
         <div class="bg-white px-8 py-6">
             <div class="flex justify-between items-center mb-3">
                 <span id="monthTitle" class="text-[11px] font-black text-gray-400 uppercase">--/-- CYCLE</span>
@@ -71,21 +101,19 @@
             <p class="mt-2 text-[10px] text-gray-400 font-bold">月總額支出累計: $<span id="monthSum">0</span></p>
         </div>
 
+        <!-- 操作輸入區 -->
         <div class="px-8 py-4 space-y-4 bg-white">
-            <div class="grid grid-cols-2 gap-4">
-                <div class="space-y-1">
-                    <label class="text-[10px] font-black text-gray-400 ml-1">總付出金額</label>
-                    <input id="amountInput" type="number" placeholder="0" class="w-full p-5 bg-gray-50 border-2 border-gray-100 rounded-2xl text-3xl font-black focus:border-brand-500 outline-none">
+            <div class="space-y-1">
+                <div class="flex justify-between items-center">
+                    <label class="text-[10px] font-black text-gray-400 ml-1">金額 (負數代表收入/回流)</label>
+                    <button type="button" onclick="toggleNegative()" class="text-[10px] font-black bg-purple-100 text-brand-700 px-2.5 py-1 rounded-lg hover:bg-brand-600 hover:text-white transition-all">+/– 切換正負數</button>
                 </div>
-                <div class="space-y-1">
-                    <label class="text-[10px] font-black text-gray-400 ml-1">幫墊/代轉金額 (選填)</label>
-                    <input id="advanceInput" type="number" placeholder="0" class="w-full p-5 bg-amber-50/60 border-2 border-amber-100 rounded-2xl text-2xl font-black text-amber-700 focus:border-amber-400 outline-none">
-                </div>
+                <input id="amountInput" type="number" step="any" placeholder="0" class="w-full p-5 bg-gray-50 border-2 border-gray-100 rounded-2xl text-3xl font-black focus:border-brand-500 outline-none">
             </div>
             <div class="grid grid-cols-2 gap-4">
                 <div class="space-y-1">
                     <label class="text-[10px] font-black text-gray-400 ml-1">項目備註</label>
-                    <input id="descInput" type="text" placeholder="甲蝦密" class="w-full p-4 bg-gray-50 border-2 border-gray-100 rounded-2xl font-medium focus:border-brand-500 outline-none">
+                    <input id="descInput" type="text" placeholder="例如：午餐 / 收到轉帳" class="w-full p-4 bg-gray-50 border-2 border-gray-100 rounded-2xl font-medium focus:border-brand-500 outline-none">
                 </div>
                 <div class="space-y-1">
                     <label class="text-[10px] font-black text-gray-400 ml-1">時間日期</label>
@@ -95,6 +123,7 @@
             <button onclick="handleAction()" class="w-full py-4 bg-brand-600 text-white font-black rounded-3xl text-base shadow-xl active:scale-95 transition-all">確認新增項目</button>
         </div>
 
+        <!-- 明細區 -->
         <div class="px-8 py-5 bg-white border-t border-gray-50">
             <div class="flex justify-between items-center mb-4">
                 <h3 class="text-[11px] font-black text-gray-400 uppercase">本月循環明細</h3>
@@ -103,6 +132,7 @@
             <div id="expenseList" class="space-y-3 max-h-[300px] overflow-y-auto pr-1"></div>
         </div>
 
+        <!-- 月曆區 (置底) -->
         <div class="bg-white px-8 py-8 border-t border-gray-50">
             <div class="flex justify-between items-center mb-5 px-2">
                 <button onclick="changeMonth(-1)" class="text-brand-500 font-black text-lg p-1">&lt;</button>
@@ -117,7 +147,7 @@
     </div>
 
 <script>
-    const STORAGE_KEY = 'food_budget_v6_7';
+    const STORAGE_KEY = 'food_budget_v6_8';
     let data = JSON.parse(localStorage.getItem(STORAGE_KEY)) || { expenses: [], weekTotal: 2100, monthTotal: 9000 };
     let currentCalDate = new Date();
 
@@ -137,47 +167,39 @@
         return { start, end: start + (7 * 24 * 60 * 60 * 1000) - 1 };
     }
 
+    function toggleNegative() {
+        const input = document.getElementById('amountInput');
+        if (input.value) {
+            input.value = (parseFloat(input.value) * -1);
+        } else {
+            input.value = '-';
+        }
+    }
+
     function handleAction() {
-        const totalAmount = parseFloat(document.getElementById('amountInput').value);
-        const advanceAmount = parseFloat(document.getElementById('advanceInput').value) || 0;
-        const note = document.getElementById('descInput').value.trim() || "未命名";
+        const amount = parseFloat(document.getElementById('amountInput').value);
+        const note = document.getElementById('descInput').value.trim() || (amount < 0 ? "收到款項/回流" : "未命名");
         const timeInputVal = document.getElementById('timeInput').value;
         const time = timeInputVal ? new Date(timeInputVal).getTime() : Date.now();
 
-        if (isNaN(totalAmount) || totalAmount <= 0) return;
-        if (advanceAmount > totalAmount) {
-            alert('墊付金額不能大於總金額喔！');
+        if (isNaN(amount) || amount === 0) {
+            alert('請輸入有效金額');
             return;
         }
 
-        // myShare 代表真正扣你自己預算的金額
-        const myShare = totalAmount - advanceAmount;
-
         data.expenses.unshift({ 
             id: Date.now(), 
-            totalAmount, 
-            advanceAmount, 
-            myShare, 
-            note, 
-            timestamp: time,
-            isRecovered: false 
+            amount: amount, 
+            note: note, 
+            timestamp: time 
         });
         
         data.expenses.sort((a, b) => b.timestamp - a.timestamp);
         
         document.getElementById('amountInput').value = '';
-        document.getElementById('advanceInput').value = '';
         document.getElementById('descInput').value = '';
         resetTimeInput();
         saveAndRender();
-    }
-
-    function toggleRecovered(id) {
-        const item = data.expenses.find(i => i.id === id);
-        if (item) {
-            item.isRecovered = !item.isRecovered;
-            saveAndRender();
-        }
     }
 
     function deleteItem(id) {
@@ -222,9 +244,8 @@
         const weekExpenses = data.expenses.filter(i => i.timestamp >= week.start && i.timestamp <= week.end);
         const monthExpenses = data.expenses.filter(i => i.timestamp >= month.start && i.timestamp <= month.end);
         
-        // 預算只計算個人實際負擔部分 (myShare)
-        const weekSum = weekExpenses.reduce((s, i) => s + (i.myShare !== undefined ? i.myShare : i.amount), 0);
-        const monthSum = monthExpenses.reduce((s, i) => s + (i.myShare !== undefined ? i.myShare : i.amount), 0);
+        const weekSum = weekExpenses.reduce((s, i) => s + (i.amount || i.myShare || 0), 0);
+        const monthSum = monthExpenses.reduce((s, i) => s + (i.amount || i.myShare || 0), 0);
 
         document.getElementById('weekSum').innerText = Math.round(weekSum);
         document.getElementById('weekBalance').innerText = Math.round(data.weekTotal - weekSum);
@@ -236,7 +257,7 @@
         document.getElementById('monthSum').innerText = Math.round(monthSum);
         document.getElementById('monthBalance').innerText = Math.round(data.monthTotal - monthSum);
 
-        const progress = Math.min((monthSum / data.monthTotal) * 100, 100);
+        const progress = Math.min(Math.max((monthSum / data.monthTotal) * 100, 0), 100);
         document.getElementById('monthProgress').style.width = progress + '%';
 
         const list = document.getElementById('expenseList');
@@ -245,36 +266,21 @@
             : monthExpenses.map(item => {
                 const itemDate = new Date(item.timestamp);
                 const timeStr = `${itemDate.getMonth()+1}/${itemDate.getDate()}`;
-                const myAmount = item.myShare !== undefined ? item.myShare : item.amount;
-                const advance = item.advanceAmount || 0;
+                const val = item.amount !== undefined ? item.amount : (item.myShare || 0);
+                const isNegative = val < 0;
 
                 return `
-                <div class="bg-gray-50/80 p-4 rounded-2xl border border-gray-100">
-                    <div class="flex justify-between items-start">
-                        <div>
-                            <div class="flex items-baseline space-x-2">
-                                <span class="font-black text-gray-800 text-lg">$${myAmount}</span>
-                                ${advance > 0 ? `<span class="text-[10px] text-gray-400">(總付 $${item.totalAmount})</span>` : ''}
-                            </div>
-                            <p class="text-[10px] text-gray-400 font-bold uppercase mt-0.5">${item.note}</p>
-                        </div>
-                        <div class="flex items-center space-x-2">
-                            <span class="text-[9px] font-bold text-gray-300">${timeStr}</span>
-                            <button onclick="deleteItem(${item.id})" class="text-gray-300 hover:text-red-500 font-bold text-lg p-1">&times;</button>
-                        </div>
+                <div class="bg-gray-50/80 p-4 rounded-2xl border border-gray-100 flex justify-between items-center">
+                    <div>
+                        <span class="font-black ${isNegative ? 'text-emerald-600' : 'text-gray-800'} text-lg">
+                            ${isNegative ? `+$${Math.abs(val)}` : `$${val}`}
+                        </span>
+                        <p class="text-[10px] text-gray-400 font-bold uppercase mt-0.5">${item.note}</p>
                     </div>
-                    ${advance > 0 ? `
-                        <div class="mt-2 pt-2 border-t border-gray-200/50 flex justify-between items-center">
-                            <span class="text-[10px] font-bold text-amber-600">幫墊 $${advance}</span>
-                            <button onclick="toggleRecovered(${item.id})" class="text-[10px] font-black px-2.5 py-1 rounded-full transition-all ${
-                                item.isRecovered 
-                                ? 'bg-emerald-100 text-emerald-700' 
-                                : 'bg-amber-100 text-amber-700 hover:bg-amber-200'
-                            }">
-                                ${item.isRecovered ? '✓ 已收回現金' : '待收回 (點擊結清)'}
-                            </button>
-                        </div>
-                    ` : ''}
+                    <div class="flex items-center space-x-2">
+                        <span class="text-[9px] font-bold text-gray-300">${timeStr}</span>
+                        <button onclick="deleteItem(${item.id})" class="text-gray-300 hover:text-red-500 font-bold text-lg p-1">&times;</button>
+                    </div>
                 </div>
                 `;
             }).join('');
@@ -302,6 +308,23 @@
     }
 
     function manualReset() { if(confirm("確定重置所有數據？")) { data.expenses = []; saveAndRender(); } }
+
+    // Service Worker 註冊 (PWA 支援)
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', () => {
+        const swCode = `
+          const CACHE_NAME = 'purple-budget-v68';
+          self.addEventListener('install', (e) => {
+            e.waitUntil(caches.open(CACHE_NAME).then((cache) => cache.addAll(['./'])));
+          });
+          self.addEventListener('fetch', (e) => {
+            e.respondWith(caches.match(e.request).then((res) => res || fetch(e.request)));
+          });
+        `;
+        const blob = new Blob([swCode], { type: 'application/javascript' });
+        navigator.serviceWorker.register(URL.createObjectURL(blob)).catch(() => {});
+      });
+    }
 
     resetTimeInput();
     render();
